@@ -7,6 +7,7 @@ class SSLPayment(models.Model):
     cus_name = models.CharField(max_length=100)
     cus_email = models.EmailField(max_length=100)
     cus_phone = models.CharField(max_length=20)
+    reference = models.CharField(max_length=20, null=True, blank=True)
     status = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

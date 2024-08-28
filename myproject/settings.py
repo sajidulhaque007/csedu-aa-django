@@ -218,11 +218,11 @@ CELERY_TASK_RESULT_EXPIRES = 3600
 CELERY_TASK_DEFAULT_QUEUE = 'myproject.celery'
 
 # SSLCommerz Configuration
-SSLCOMMERZ_STORE_ID = 'trave6610f8ceabaa0'
-SSLCOMMERZ_STORE_PASSWORD = 'trave6610f8ceabaa0@ssl'
-SSLCOMMERZ_INIT_URL = 'https://sandbox.sslcommerz.com/gwprocess/v4/api.php'  # For Sandbox
-SSLCOMMERZ_VALIDATION_URL = 'https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php'  # For Sandbox
-SSLCOMMERZ_SANDBOX = True  # Change to False for live mode
+SSLCOMMERZ_STORE_ID = 'tripn66a8968d7042f'
+SSLCOMMERZ_STORE_PASSWORD = 'tripn66a8968d7042f@ssl'
+SSLCOMMERZ_API_URL = 'https://sandbox.sslcommerz.com/gwprocess/v4/api.php'
+SSLCOMMERZ_VALIDATION_URL = 'https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php'
+SSLCOMMERZ_SANDBOX = True
 
 # Your domain or local testing domain
 YOUR_DOMAIN = 'http://localhost:8000'

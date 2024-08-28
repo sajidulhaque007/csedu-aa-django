@@ -3,14 +3,25 @@ from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import SSLPayment  
-from sslcommerz.serializers import SSLPaymentSerializer 
+from .models import SSLPayment
+from sslcommerz.serializers import SSLPaymentSerializer
 import uuid
+
+# import logging
+#
+# logger = logging.getLogger(__name__)
 
 class InitiatePaymentView(APIView):
     def post(self, request):
         # Get payment data from the frontend
         amount = request.data.get('amount')
+        reference = request.data.get('reference')
+        cus_name = request.data.get('cus_name')
+        cus_email = request.data.get('cus_email')
+        cus_phone = request.data.get('cus_phone')
+        cus_address = request.data.get('cus_address')
+        cus_city = request.data.get('cus_city')
+        cus_country = request.data.get('cus_country')
         currency = 'BDT'
         transaction_id = str(uuid.uuid4())
 
@@ -19,9 +30,12 @@ class InitiatePaymentView(APIView):
             transaction_id=transaction_id,
             amount=amount,
             currency=currency,
-            status='PENDING'
+            status='PENDING',
+            reference=reference,
+            cus_name=cus_name,
+            cus_email=cus_email,
+            cus_phone=cus_phone,
         )
-
         # SSLCommerz payment initialization data
         payment_data = {
             'store_id': settings.SSLCOMMERZ_STORE_ID,
@@ -32,12 +46,12 @@ class InitiatePaymentView(APIView):
             'success_url': settings.SSLCOMMERZ_SUCCESS_URL,
             'fail_url': settings.SSLCOMMERZ_FAIL_URL,
             'cancel_url': settings.SSLCOMMERZ_CANCEL_URL,
-            'cus_name': request.data.get('customer_name'),
-            'cus_email': request.data.get('customer_email'),
-            'cus_phone': request.data.get('customer_phone'),
-            'cus_add1': request.data.get('customer_address'),
-            'cus_city': request.data.get('customer_city'),
-            'cus_country': request.data.get('customer_country'),
+            'cus_name': request.data.get('cus_name'),
+            'cus_email': request.data.get('cus_email'),
+            'cus_phone': request.data.get('cus_phone'),
+            'cus_add1': request.data.get('cus_address'),
+            'cus_city': request.data.get('cus_city'),
+            'cus_country': request.data.get('cus_country'),
             'shipping_method': 'NO',
             'product_name': 'Test Product',
             'product_category': 'Test Category',
@@ -48,6 +62,9 @@ class InitiatePaymentView(APIView):
         response = requests.post(settings.SSLCOMMERZ_API_URL, data=payment_data)
         response_data = response.json()
 
+        # Log the response data
+        # logger.debug(f'SSLCommerz Response Data: {response_data}')
+
         if response_data.get('status') == 'SUCCESS':
             return Response({
                 'status': 'SUCCESS',
@@ -56,8 +73,7 @@ class InitiatePaymentView(APIView):
         else:
             payment.status = 'FAILED'
             payment.save()
-            return Response({'status': 'FAILED', 'message': 'Payment initiation failed'}, status=status.HTTP_400_BAD_REQUEST)
-
+            return Response({'status': 'FAILED', 'message': f'Payment initiation failed: {response_data}'}, status=status.HTTP_400_BAD_REQUEST)
 
 class PaymentSuccessView(APIView):
     def post(self, request):
@@ -91,4 +107,4 @@ class PaymentFailView(APIView):
         payment = SSLPayment.objects.get(transaction_id=transaction_id)
         payment.status = 'FAILED'
         payment.save()
-        return Response({'status': 'FAILED', 'message': 'Payment failed'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'status': 'FAILED', 'message': 'Payment failed for some reason'}, status=status.HTTP_400_BAD_REQUEST)
