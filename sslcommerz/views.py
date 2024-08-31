@@ -35,6 +35,9 @@ class InitiatePaymentView(APIView):
             cus_name=cus_name,
             cus_email=cus_email,
             cus_phone=cus_phone,
+            cus_address=cus_address,
+            cus_city=cus_city,
+            cus_country=cus_country,
         )
         # SSLCommerz payment initialization data
         payment_data = {
