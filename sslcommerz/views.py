@@ -7,10 +7,6 @@ from .models import SSLPayment
 from sslcommerz.serializers import SSLPaymentSerializer
 import uuid
 
-# import logging
-#
-# logger = logging.getLogger(__name__)
-
 class InitiatePaymentView(APIView):
     def post(self, request):
         # Get payment data from the frontend

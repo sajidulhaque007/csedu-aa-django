@@ -1,9 +1,17 @@
 from pathlib import Path
 import os
+from django.http import JsonResponse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+def my_view(request):
+    if request.method == "OPTIONS":
+        response = JsonResponse({'status': 'ok'})
+        response["Access-Control-Allow-Origin"] = "*"
+        response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
+        response["Access-Control-Allow-Headers"] = "Content-Type"
+        return response
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
@@ -14,6 +22,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 DEBUG = bool(os.environ.get("DEBUG", default=0))
 
 ALLOWED_HOSTS = ["*"]
+
 
 # Environment Variables
 DB_NAME = os.environ.get('DB_NAME')
@@ -85,13 +94,32 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'http://cseduaa.org',
-    'https://localhost'
+    # 'https://localhost',
+    "http://localhost:3000",
+    "http://localhost:8000",
 ]
 CORS_ALLOWED_ORIGIN_REGEXES = [
     'http://cseduaa.org',
-    'https://localhost'
+    # 'https://localhost',
+    "http://localhost:3000",
+    "http://localhost:8000",
 ]
 
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
+CORS_ALLOW_HEADERS = [
+    "authorization",
+    "content-type",
+    "x-csrf-token",
+    "x-requested-with",
+]
 ROOT_URLCONF = 'myproject.urls'
 
 TEMPLATES = [
@@ -231,3 +259,4 @@ YOUR_DOMAIN = 'http://localhost:8000'
 SSLCOMMERZ_SUCCESS_URL = f'{YOUR_DOMAIN}/payments/success/'
 SSLCOMMERZ_FAIL_URL = f'{YOUR_DOMAIN}/payments/fail/'
 SSLCOMMERZ_CANCEL_URL = f'{YOUR_DOMAIN}/payments/cancel/'
+SSLCOMMERZ_IPN_URL = f'{YOUR_DOMAIN}/payments/ipn/'
