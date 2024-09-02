@@ -1150,7 +1150,8 @@ COPY public.auth_group_permissions (id, group_id, permission_id) FROM stdin;
 -- Data for Name: auth_permission; Type: TABLE DATA; Schema: public; Owner: cseduaa
 --
 
-COPY public.auth_permission (id, name, content_type_id, codename) FROM stdin;
+COPY public.auth_permission (id, name, content_type_id, codename)
+FROM stdin;
 1	Can add user	1	add_user
 2	Can change user	1	change_user
 3	Can delete user	1	delete_user
