@@ -8,6 +8,8 @@ from sslcommerz.serializers import SSLPaymentSerializer
 import uuid
 from django.http import JsonResponse
 from django.shortcuts import redirect
+from django.http import Http404
+from .models import SSLPayment
 
 class InitiatePaymentView(APIView):
     def post(self, request):
@@ -95,7 +97,6 @@ class PaymentSuccessView(APIView):
         if validation_data['status'] == 'VALID':
             payment.status = 'SUCCESS'
             payment.save()
-            # Construct the redirect URL with the transaction_id as a query parameter
             redirect_url = f"http://{domain}/payments/success/?transaction_id={transaction_id}"
             return redirect(redirect_url)
         else:
@@ -106,25 +107,38 @@ class PaymentSuccessView(APIView):
                 status=status.HTTP_400_BAD_REQUEST)
 
 
-class PaymentFailView(APIView):
-    def post(self, request):
-        transaction_id = request.data.get('tran_id')
-        domain = 'localhost:3000'
-        payment = SSLPayment.objects.get(transaction_id=transaction_id)
-        payment.status = 'FAILED'
-        payment.save()
-        redirect_url = f"http://{domain}/payments/failed/?transaction_id={transaction_id}"
-        return redirect(redirect_url)
-        return Response({'status': 'FAILED', 'message': 'Payment failed for some reason'}, status=status.HTTP_400_BAD_REQUEST)
+# class PaymentFailView(APIView):
+#     def post(self, request):
+#         transaction_id = request.data.get('tran_id')
+#         domain = 'localhost:3000'
+#         payment = SSLPayment.objects.get(transaction_id=transaction_id)
+#         payment.status = 'FAILED'
+#         payment.save()
+#         redirect_url = f"http://{domain}/payments/failed/?transaction_id={transaction_id}"
+#         return redirect(redirect_url)
+#         return Response({'status': 'FAILED', 'message': 'Payment failed for some reason'}, status=status.HTTP_400_BAD_REQUEST)
+    class PaymentFailView(APIView):
+        def post(self, request):
+            transaction_id = request.data.get('tran_id')
+            domain = 'localhost:3000'
+            try:
+                payment = SSLPayment.objects.get(transaction_id=transaction_id)
+            except SSLPayment.DoesNotExist:
+                raise Http404("Payment not found")
+            payment.status = 'FAILED'
+            payment.save()
+            redirect_url = f"http://{domain}/payments/failed/?transaction_id={transaction_id}"
+            return redirect(redirect_url)
 
 class PaymentCancelView(APIView):
     def post(self, request):
         transaction_id = request.data.get('tran_id')
         domain = 'localhost:3000'
-        payment = SSLPayment.objects.get(transaction_id=transaction_id)
+        try:
+            payment = SSLPayment.objects.get(transaction_id=transaction_id)
+        except SSLPayment.DoesNotExist:
+            raise Http404("Payment not found")
         payment.status = 'FAILED'
         payment.save()
         redirect_url = f"http://{domain}/payments/cancel/?transaction_id={transaction_id}"
         return redirect(redirect_url)
-        return Response({'status': 'CANCELED', 'message': 'Payment cancelled for some reason'},
-                        status=status.HTTP_400_BAD_REQUEST)
