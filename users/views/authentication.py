@@ -20,8 +20,68 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.conf import settings
 import logging
 from users.models.choices import ROLE_CHOICES
+import pyrebase
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 logger = logging.getLogger(__name__)
+# Initialize Firebase
+firebase_config = {
+  'apiKey': 'AIzaSyD2aYx8IBIK2Itef4UVfZKNYVmHpkZznVI',
+  'authDomain': 'cseduaa-c1a30.firebaseapp.com',
+  'projectId': 'cseduaa-c1a30',
+  'storageBucket': 'cseduaa-c1a30.appspot.com',
+  'messagingSenderId': '137515276822',
+  'appId': '1:137515276822:web:0debdc77bf4373ca63f337',
+  "databaseURL": "https://cseduaa-c1a30.firebaseio.com"
+
+}
+firebase = pyrebase.initialize_app(firebase_config)
+auth = firebase.auth()
+
+@csrf_exempt
+def google_signin(request):
+    if request.method == "POST":
+        try:
+            # Log the request body to debug
+            print("Request body:", request.body)
+            
+            # Parse request body
+            body = json.loads(request.body.decode('utf-8'))
+            id_token = body.get('idToken')
+            
+            if not id_token:
+                return JsonResponse({"error": "No token provided"}, status=400)
+
+            # Verify the ID token with Firebase
+            decoded_token = auth.get_account_info(id_token)
+            email_address = decoded_token['users'][0]['email']
+
+            # Check if the user already exists in the Django backend
+            try:
+                user = User.objects.get(email_address=email_address)  # Use email_address field instead of email
+            except User.DoesNotExist:
+                user = User.objects.create(
+                    username=email_address,
+                    email_address=email_address,
+                    password=user.set_password(email_address)   # Set a random password for Google users
+                )          
+            token, _ = Token.objects.get_or_create(user=user)
+            return JsonResponse({
+                "message": "Sign-in successful",
+                "token": token.key,
+                "user": {
+                    "username": user.username,
+                    "email_address": user.email_address, 
+                    "password": user.password,# Return email_address in the response
+                }
+            })
+        except Exception as e:
+            print("Error:", str(e))  # Log the error for debugging
+            return JsonResponse({"error": str(e)}, status=400)
+    
+    return JsonResponse({"error": "Invalid request method"}, status=405)
 
 
 @csrf_exempt
@@ -51,11 +111,6 @@ def obtain_auth_token(request):
         return Response({
             'error': 'Invalid credentials'
         }, status=status.HTTP_401_UNAUTHORIZED)
-    # if user.is_pending:
-    #     return Response({
-    #         'error': 'Registration pending'
-    #     }, status=status.HTTP_403_FORBIDDEN)
-
     token, created = Token.objects.get_or_create(user=user)
     return Response({'token': token.key})
 

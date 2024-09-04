@@ -1,10 +1,11 @@
 from django.urls import path
-from users.views import obtain_auth_token, logout
+from users.views import obtain_auth_token, logout,google_signin
 from . import views
 
 urlpatterns = [
     # Authentication endpoints
-    path('login/', obtain_auth_token, name='token_obtain_pair'),  # Endpoint for obtaining an authentication token
+    path('login/', obtain_auth_token, name='token_obtain_pair'),
+    path('google-signin/', google_signin, name='google-signin'),# Endpoint for obtaining an authentication token
     path('logout/',logout, name='logout'),  # Endpoint for logging out a user
     path('change-password/', views.ChangePasswordView.as_view(), name='change_password'), # endpoint for changing password
     path('reset-password/', views.ResetPassword.as_view(), name='reset_password'), # endpoint for resetting password
