@@ -1,5 +1,14 @@
 1. docker-compose exec web python manage.py migrate
 2. docker-compose exec web python create_admin.py
 
+<<<<<<< HEAD
 ***docker stop command***
 docker stop $(docker ps -q)
+=======
+ ************** for adding any new field or column to the db table ************
+ 1.docker exec -it <container_name> bash
+ 2.python manage.py makemigrations (option 1, val = 0)
+ 3.python manage.py migrate
+
+
+>>>>>>> ead01c584169f5fc2b4d0ab638c28cdeb61bdb24
