@@ -102,6 +102,7 @@ def obtain_auth_token(request):
     """
     Obtain a token for a user and send an email on successful login.
     """
+    timestamp = timezone.now()
     username = request.data.get("username")
     email_address = request.data.get("email")
     password = request.data.get("password")
@@ -125,6 +126,7 @@ def obtain_auth_token(request):
         subject = 'Login Successful'
         body = render_to_string('login_success.html', {
             'user': user,
+            'timestamp': timestamp
         })
         send_mail(
             subject,
