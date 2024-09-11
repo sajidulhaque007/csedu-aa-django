@@ -17,6 +17,16 @@ services:
     networks:
       - backend
 
+    # Add environment variables for email configuration
+    environment:
+      - EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+      - EMAIL_HOST=smtp.gmail.com # Replace with your SMTP server
+      - EMAIL_PORT=587
+      - EMAIL_USE_TLS=True
+      - EMAIL_HOST_USER=alumniassociationcseduaa@gmail.com # Replace with your email
+      - EMAIL_HOST_PASSWORD=qizmzjbmfirpanpo # Replace with your email password
+      - DEFAULT_FROM_EMAIL=alumniassociationcseduaa@gmail.com # Default email address for notifications
+
   db:
     image: postgres
     ports:
@@ -27,6 +37,7 @@ services:
       - ./.env.prod.db
     networks:
       - backend
+
   pgadmin:
     image: dpage/pgadmin4
     environment:
@@ -38,6 +49,7 @@ services:
       - db
     networks:
       - backend
+
 volumes:
   db-data:
 
