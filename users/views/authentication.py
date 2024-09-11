@@ -24,6 +24,17 @@ import pyrebase
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.core.mail import send_mail
+from django.conf import settings
+from django.db import models
+from users.models import User
+from base.models import BaseModel
+from mailing.models.email import CommonEmailAddress
+import smtplib, re
+from django.utils import timezone
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+import logging
 
 logger = logging.getLogger(__name__)
 # Initialize Firebase
@@ -89,29 +100,41 @@ def google_signin(request):
 @permission_classes([AllowAny])
 def obtain_auth_token(request):
     """
-    Obtain a token for a user.
+    Obtain a token for a user and send an email on successful login.
     """
     username = request.data.get("username")
-    email = request.data.get("email")
+    email_address = request.data.get("email")
     password = request.data.get("password")
-
     if username:
         user = authenticate(username=username, password=password)
-    elif email:
+    elif email_address:
         try:
-            user = User.objects.get(email_address=email)
+            user = User.objects.get(email_address=email_address)
         except User.DoesNotExist:
             user = None
         if user and not user.check_password(password):
             user = None
     else:
         user = None
-
     if not user:
         return Response({
             'error': 'Invalid credentials'
         }, status=status.HTTP_401_UNAUTHORIZED)
     token, created = Token.objects.get_or_create(user=user)
+    try:
+        subject = 'Login Successful'
+        body = render_to_string('login_success.html', {
+            'user': user,
+        })
+        send_mail(
+            subject,
+            body,
+            'info@cseduaa.org',  # Sender email
+            [user.email_address],  # Recipient email
+            fail_silently=False,
+        )
+    except Exception as e:
+        return Response({'error': f'Failed to send email: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     return Response({'token': token.key})
 
 
