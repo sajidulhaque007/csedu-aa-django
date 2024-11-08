@@ -15,7 +15,7 @@ def create_admin():
     if User.objects.filter(username=username).exists():
         print(f'User "{username}" already exists.')
     else:
-        admin_user = User.objects.create_superuser(username=username, email_address=email, password=password,role="GS")
+        admin_user = User.objects.create_superuser(username=username, email_address=email, password=password)
         print(f'Superuser "{username}" created successfully.')
 
         profile = Profile.objects.create(
