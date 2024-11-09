@@ -9,13 +9,14 @@ from users.models import User, Profile
 
 def create_admin():
     username = "admin"
-    email = "admin@gmail.com"
+    email = "contact@cseduaa.org"
     password = "admin123"
+    role = "GS"
 
     if User.objects.filter(username=username).exists():
         print(f'User "{username}" already exists.')
     else:
-        admin_user = User.objects.create_superuser(username=username, email_address=email, password=password)
+        admin_user = User.objects.create_superuser(username=username, email_address=email, password=password, role=role)
         print(f'Superuser "{username}" created successfully.')
 
         profile = Profile.objects.create(

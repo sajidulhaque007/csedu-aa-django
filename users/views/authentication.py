@@ -128,13 +128,13 @@ def obtain_auth_token(request):
             'user': user,
             'timestamp': timestamp
         })
-        send_mail(
-            subject,
-            body,
-            'info@cseduaa.org',  # Sender email
-            [user.email_address],  # Recipient email
-            fail_silently=False,
-        )
+        # send_mail(
+        #     subject,
+        #     body,
+        #     'contact@cseduaa.org',  # Sender email
+        #     [user.email_address],  # Recipient email
+        #     fail_silently=False,
+        # )
     except Exception as e:
         return Response({'error': f'Failed to send email: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     return Response({'token': token.key})
