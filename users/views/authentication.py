@@ -381,6 +381,36 @@ def set_role(request):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# @api_view(['POST'])
+# @permission_classes([IsAuthenticated])
+# def accept_pending(request, username):
+#     """
+#     API endpoint to accept or decline a pending user.
+#     Only superusers can access this method.
+#     """
+#     try:
+#         # Check if user exists
+#         user = User.objects.get(username=username)
+
+#         is_accepted = request.data.get("accept")
+        
+#         if is_accepted:
+#             # Remove adminship from user
+#             UserManager().accept_pending(user)
+#         else:
+#             user.delete()
+        
+#         # Serialize and return user data
+#         serializer = UserSerializer(user)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+        
+#     except User.DoesNotExist:
+#         return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+#     except Exception as e:
+#         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def accept_pending(request, username):
@@ -397,6 +427,23 @@ def accept_pending(request, username):
         if is_accepted:
             # Remove adminship from user
             UserManager().accept_pending(user)
+            
+            # Send acceptance email
+            mail_manager = SystemMailManager()
+            sender = User.objects.filter(role='GS').first()  # Assuming the sender is set like this
+            recipients = [user.email_address]  # Replace with the correct email field
+            subject = 'Your Registration Has Been Accepted'
+            context = {
+                'first_name': user.profile.first_name,  # Assuming the user has a profile with `first_name`
+                'last_name': user.profile.last_name,    # Adjust based on your model structure
+            }
+            body = render_to_string('registration_success.html', context)
+            try:
+                mail_manager.create_and_send_mail(sender, recipients, subject, body)
+            except Exception as e:
+                # Log the error but continue with the response
+                logger.error(str(e), exc_info=True, extra={'request': request})
+        
         else:
             user.delete()
         
@@ -409,3 +456,4 @@ def accept_pending(request, username):
         
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

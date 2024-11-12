@@ -10,7 +10,7 @@ class Command(BaseCommand):
             email_address="admin@gmail.com",
             password="admin123",
             referred_by=None
-            role="GS",
+            # role="GS",
         )
         Profile.objects.create(
             user=admin_user,

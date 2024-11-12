@@ -3,6 +3,7 @@ FROM python:3.9-slim-buster
 RUN apt-get update && apt-get install -y bash
 # Set the working directory to /app
 WORKDIR /app
+ENV PYTHONUNBUFFERED=1
 
 # Copy the requirements file into the container
 COPY requirements.txt .

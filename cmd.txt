@@ -11,3 +11,4 @@ docker start $(docker ps -a -f status=exited)
  2.python manage.py makemigrations (option 1, val = 0)
  3.python manage.py migrate
 
+docker exec -it csedu-aa-django-web-1 bash

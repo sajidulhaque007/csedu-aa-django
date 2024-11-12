@@ -8,21 +8,22 @@ from users.models import User, Profile
 
 
 def create_admin():
-    username = "admin"
-    email = "contact@cseduaa.org"
+    username = "sajid"
+    email = "seip321815@gmail.com"
+    # email = "contact@cseduaa.org"
     password = "admin123"
-    role = "GS"
+    # role = "GS"
 
     if User.objects.filter(username=username).exists():
         print(f'User "{username}" already exists.')
     else:
-        admin_user = User.objects.create_superuser(username=username, email_address=email, password=password, role=role)
+        admin_user = User.objects.create_superuser(username=username, email_address=email, password=password)
         print(f'Superuser "{username}" created successfully.')
 
         profile = Profile.objects.create(
             user=admin_user,
-            first_name="System",
-            last_name="Admin",
+            first_name="sajid",
+            last_name="haque",
             profile_picture=None,
             date_of_birth="1990-01-01",
             sex="M",
