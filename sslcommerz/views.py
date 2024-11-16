@@ -21,9 +21,9 @@ logger = logging.getLogger(__name__)
 class InitiatePaymentView(APIView):
     def post(self, request):
         # Get payment data from the frontend
-
-        print("Request Data:", request.data)
-        raise Exception("Stopping execution for debugging")
+        # print("Request Datass:", request.data)
+        # print("tran id:",request.data.get('tran_id') )
+        # raise Exception("Stopping execution for debugging")
         amount = request.data.get('amount')
         reference = request.data.get('reference')
         cus_name = request.data.get('cus_name')
@@ -33,8 +33,18 @@ class InitiatePaymentView(APIView):
         cus_city = request.data.get('cus_city')
         cus_country = request.data.get('cus_country')
         currency = 'BDT'
-        transaction_id = str(uuid.uuid4())
+        # transaction_id = str(uuid.uuid4())
+        transaction_id = request.data.get('tran_id')
+        membershipId = request.data.get('membershipId')
+        user_id = request.data.get('user_id')
+          # check if membership id already exists
+        existing_payment = SSLPayment.objects.filter(user_id=user_id).first()
+        if existing_payment:
 
+            membershipId = existing_payment.membershipId
+        else:
+            if not membershipId:
+                membershipId = request.data.get('membershipId')
         # Store the payment in the database
         payment = SSLPayment.objects.create(
             transaction_id=transaction_id,
@@ -49,6 +59,8 @@ class InitiatePaymentView(APIView):
             cus_address=cus_address,
             cus_city=cus_city,
             cus_country=cus_country,
+            membershipId=membershipId,
+            user_id=user_id,
         )
         # SSLCommerz payment initialization data
         payment_data = {
@@ -137,17 +149,19 @@ class PaymentSuccessView(APIView):
             payment.status = 'SUCCESS'
             payment.save()
 
-            # Assuming `user` is associated with the payment object (adjust as needed)
             email_address = payment.cus_email
             name = payment.cus_name
-            print(email_address)  
+            membershipId = payment.membershipId
+            transaction_id = payment.transaction_id
+            # print(email_address)  
             mail_manager = SystemMailManager()
             sender = User.objects.filter(role='GS').first()
-            # recipients = [user.email_address] 
             recipients = [payment.cus_email]
             subject = 'Your Payment was Successful'
             context = {
                 'name': name,   
+                'membershipId': membershipId,   
+                'transaction_id': transaction_id,   
             }
             body = render_to_string('payment_success.html', context)
 
@@ -193,3 +207,23 @@ class PaymentCancelView(APIView):
         payment.save()
         redirect_url = f"http://{domain}/payments/cancel/?transaction_id={transaction_id}"
         return redirect(redirect_url)
+
+class PaymentUsers(APIView):
+    def get(self, request):
+        # Retrieve selected fields from SSLPayment objects
+        payments = SSLPayment.objects.filter(status='SUCCESS').values(
+              'cus_name',
+              'cus_email',
+              'membershipId',
+              'transaction_id',
+              'amount',
+              'created_at',
+              'cus_phone',
+              'status',
+              'cus_phone',
+          )
+
+        # print(list(payments))
+        # Return data as JSON response
+        return Response(list(payments), status=status.HTTP_200_OK)
+       

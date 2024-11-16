@@ -12,3 +12,4 @@ docker start $(docker ps -a -f status=exited)
  3.python manage.py migrate
 
 docker exec -it csedu-aa-django-web-1 bash
+docker-compose -f docker-compose.yml up -d --build
